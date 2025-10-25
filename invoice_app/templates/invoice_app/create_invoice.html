@@ -1,0 +1,64 @@
+{% extends 'invoice_app/base.html' %}
+
+{% block content %}
+<h2>Create Invoice</h2>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="invoice-details">
+        <div class="form-group">
+            <label for="{{ form.document_type.id_for_label }}">Document Type:</label>
+            {{ form.document_type }}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.letterhead.id_for_label }}">Letter Head:</label>
+            {{ form.letterhead }}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.customer_name.id_for_label }}">Customer Name:</label>
+            {{ form.customer_name }}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.address.id_for_label }}">Address:</label>
+            {{ form.address }}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.date.id_for_label }}">Date:</label>
+            {{ form.date }}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.note.id_for_label }}">Terms and Conditions:</label>
+            {{ form.note }}
+        </div>
+    </div>
+    
+    <h3>Invoice Items</h3>
+    {{ formset.management_form }}
+    <div id="invoice-items">
+        {% for form in formset %}
+        <div class="item-form">
+            {{ form.as_p }}
+        </div>
+        {% endfor %}
+    </div>
+    
+    <button type="button" id="add-item">Add Item</button>
+    <button type="submit">Save Invoice</button>
+</form>
+
+<script>
+document.getElementById('add-item').addEventListener('click', function() {
+    var forms = document.getElementsByClassName('item-form');
+    var formNum = forms.length;
+    var totalForms = document.getElementById('id_items-TOTAL_FORMS');
+    
+    var newForm = forms[0].cloneNode(true);
+    var formRegex = RegExp(`items-(\\d){1}-`,'g');
+    
+    newForm.innerHTML = newForm.innerHTML.replace(formRegex, `items-${formNum}-`);
+    document.getElementById('invoice-items').appendChild(newForm);
+    
+    totalForms.setAttribute('value', formNum + 1);
+});
+</script>
+{% endblock %}

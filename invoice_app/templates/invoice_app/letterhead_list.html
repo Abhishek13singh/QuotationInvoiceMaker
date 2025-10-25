@@ -1,0 +1,22 @@
+{% extends 'invoice_app/base.html' %}
+
+{% block content %}
+<h2>Letter Heads</h2>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Upload Letter Head</button>
+</form>
+
+<div class="letterheads">
+    {% for letterhead in letterheads %}
+    <div class="letterhead">
+        <img src="{{ letterhead.image.url }}" alt="{{ letterhead.name }}" style="max-width: 200px;">
+        <p>{{ letterhead.name }}</p>
+    </div>
+    {% endfor %}
+</div>
+
+<a href="{% url 'create_invoice' %}" class="button">Create New Invoice</a>
+{% endblock %}

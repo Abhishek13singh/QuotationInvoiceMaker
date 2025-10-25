@@ -1,0 +1,57 @@
+from django import forms
+from .models import Invoice, InvoiceItem, LetterHead
+
+class LetterHeadForm(forms.ModelForm):
+    class Meta:
+        model = LetterHead
+        fields = ['name', 'image']
+
+class InvoiceForm(forms.ModelForm):
+    class Meta:
+        model = Invoice
+        fields = ['letterhead', 'customer_name', 'address', 'date', 'terms_and_conditions']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+            'terms_and_conditions': forms.Textarea(attrs={'rows': 4}),
+        }
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['terms_and_conditions'].initial = """1. Payment: 50% advance with order, balance before delivery
+2. Delivery Period: 4-5 weeks from the date of order confirmation
+3. GST Extra as applicable
+4. Validity: This quotation is valid for 30 days
+5. Installation charges extra if required"""
+
+class InvoiceItemForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        instance = kwargs.get('instance')
+        if instance and not instance.srno:
+            # Get the invoice and count existing items
+            invoice = instance.invoice if instance.invoice_id else None
+            if invoice:
+                count = invoice.items.count()
+                instance.srno = count + 1
+            else:
+                instance.srno = 1
+
+    class Meta:
+        model = InvoiceItem
+            fields = ['srno', 'description', 'quantity', 'length', 'breadth', 'unit_price']
+        widgets = {
+            'srno': forms.NumberInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'style': 'resize: vertical;'}),
+            'quantity': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'length': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'breadth': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'unit_price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+        }
+
+InvoiceItemFormSet = forms.inlineformset_factory(
+    Invoice, 
+    InvoiceItem,
+    form=InvoiceItemForm,
+    extra=1,
+    can_delete=True
+)

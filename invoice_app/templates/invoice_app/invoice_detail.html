@@ -1,0 +1,58 @@
+{% extends 'invoice_app/base.html' %}
+{% load invoice_filters %}
+
+{% block content %}
+<div class="invoice-detail">
+    <div class="letterhead">
+        <img src="{{ invoice.letterhead.image.url }}" alt="{{ invoice.letterhead.name }}" style="max-width: 200px;">
+    </div>
+    
+    <div class="customer-info">
+    <h3>{% if invoice.document_type == 'invoice' %}Invoice No:{% else %}Quotation No:{% endif %} {{ invoice.quotation_number }}</h3>
+        <h3>To:</h3>
+        <p style="margin-left: 650px;">Date: {{ invoice.date }}</p>
+        <p>{{ invoice.customer_name }}</p>
+        <p>{{ invoice.address }}</p>
+    </div>
+    
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th>Sr.No.</th>
+                <th>Description</th>
+                <th>Quantity</th>
+                <th>Length</th>
+                <th>Breadth</th>
+                <th>Area</th>
+                <th>Per Unit Price</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in invoice.items.all %}
+            <tr>
+                <td>{{ item.srno }}</td>
+                <td>{{ item.description }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.length }}</td>
+                <td>{{ item.breadth }}</td>
+                <td>{{ item.area }}</td>
+                <td>{{ item.unit_price }}</td>
+                <td>{{ item.total }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3" style="text-align: right;">Grand Total:</td>
+                <td>{{ invoice.items.all|sum_total }}</td>
+            </tr>
+        </tfoot>
+    </table>
+    
+    <div class="actions">
+        <a href="{% url 'generate_pdf' invoice.pk %}" class="button">Download PDF</a>
+        <a href="{% url 'generate_word' invoice.pk %}" class="button">Download Word</a>
+    </div>
+</div>
+{% endblock %}
